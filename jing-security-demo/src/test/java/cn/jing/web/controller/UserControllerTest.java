@@ -3,6 +3,8 @@
  */
 package cn.jing.web.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.junit.Before;
@@ -83,4 +85,27 @@ public class UserControllerTest {
 
 		System.out.println(result);
 	}
+
+	@Test
+	public void whenUpdateSuccess() throws Exception {
+		Date date = new Date(
+				LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+		System.out.println(date.getTime());
+		String content = "{\"username\":\"jing\",\"id\":\"1\",\"password\":null,\"birthday\":" + date.getTime() + "}";
+		String result = mockMvc
+				.perform(MockMvcRequestBuilders.put("/user/1").contentType(MediaType.APPLICATION_JSON_UTF8)
+						.content(content))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.id").value("1")).andReturn().getResponse()
+				.getContentAsString();
+
+		System.out.println(result);
+	}
+
+	@Test
+	public void whenDeleteSuccess() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.delete("/user/1").contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
 }
