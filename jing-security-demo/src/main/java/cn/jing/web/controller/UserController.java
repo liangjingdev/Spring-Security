@@ -13,9 +13,12 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import cn.jing.dto.User;
 import cn.jing.dto.UserQueryCondition;
+import cn.jing.exception.UserNotExistException;
 
 /**
  * @author liangjing
@@ -61,11 +65,22 @@ public class UserController {
 	@GetMapping("/{id:\\d+}")
 	@JsonView(User.UserDetailView.class)
 	public User getInfo(@PathVariable String id) {
-		User user = new User();
-		user.setUsername("tom");
-		return user;
+
+		// 测试自定义异常处理类
+		throw new UserNotExistException(id);
+
+		// User user = new User();
+		// user.setUsername("tom");
+		// return user;
 	}
 
+	/**
+	 * function:用户创建请求
+	 * 
+	 * @param user
+	 * @param errors
+	 * @return
+	 */
 	@PostMapping
 	public User create(@Valid @RequestBody User user, BindingResult errors) {
 
@@ -80,6 +95,46 @@ public class UserController {
 		System.out.println(user.getBirthday());
 		user.setId("1");
 		return user;
+	}
+
+	/**
+	 * function:用户修改请求
+	 * 
+	 * @param user
+	 * @param errors
+	 * @return
+	 */
+	@PutMapping("/{id:\\d+}")
+	public User update(@Valid @RequestBody User user, BindingResult errors) {
+
+		// 如果发生检验错误，那么就将所有发生错误的信息逐个打印出来
+		if (errors.hasErrors()) {
+			errors.getAllErrors().forEach(error -> {
+				/*
+				 * // 在实体对象中自定义错误消息后就不需要这么麻烦了 // 强转为FieldError对象 FieldError fieldError =
+				 * (FieldError) error; // 打印出错误域名称以及其错误信息 String message = fieldError.getField()
+				 * + " " + error.getDefaultMessage();
+				 */
+				System.out.println(error.getDefaultMessage());
+			});
+		}
+
+		System.out.println(user.getId());
+		System.out.println(user.getUsername());
+		System.out.println(user.getPassword());
+		System.out.println(user.getBirthday());
+		user.setId("1");
+		return user;
+	}
+
+	/**
+	 * function:用户删除请求
+	 * 
+	 * @param id
+	 */
+	@DeleteMapping("/{id:\\d+}")
+	public void delete(@PathVariable String id) {
+		System.out.println(id);
 	}
 
 }
