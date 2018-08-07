@@ -3,12 +3,15 @@
  */
 package cn.jing.dto;
 
-import java.io.Serializable;
 import java.util.Date;
+
+import javax.validation.constraints.Past;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonView;
+
+import cn.jing.validator.MyConstraint;
 
 /**
  * @author liangjing
@@ -22,7 +25,7 @@ public class User {
 	public interface UserDetailView extends UserSimpleView {
 	};
 
-	@NotEmpty(message = "用户名不能为空")
+	@MyConstraint(message = "这是一个测试")
 	private String username;
 
 	@NotEmpty(message = "密码不能为空")
@@ -30,6 +33,7 @@ public class User {
 
 	private String id;
 
+	@Past(message = "生日必须是过去的时间")
 	private Date birthday;
 
 	@JsonView(UserSimpleView.class)
