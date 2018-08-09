@@ -28,6 +28,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import cn.jing.dto.User;
 import cn.jing.dto.UserQueryCondition;
 import cn.jing.exception.UserNotExistException;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author liangjing
@@ -39,6 +42,7 @@ public class UserController {
 
 	@GetMapping
 	@JsonView(User.UserSimpleView.class)
+	@ApiOperation(value = "用户查询服务")
 	public List<User> query(UserQueryCondition condition,
 			@PageableDefault(page = 2, size = 17, sort = "username,asc") Pageable pageable) {
 
@@ -64,14 +68,16 @@ public class UserController {
 	 */
 	@GetMapping("/{id:\\d+}")
 	@JsonView(User.UserDetailView.class)
+	@ApiImplicitParam(name = "id", value = "用户id")
 	public User getInfo(@PathVariable String id) {
 
 		// 测试自定义异常处理类
-		throw new UserNotExistException(id);
+		// throw new UserNotExistException(id);
 
-		// User user = new User();
-		// user.setUsername("tom");
-		// return user;
+		System.out.println("进入getInfo服务");
+		User user = new User();
+		user.setUsername("tom");
+		return user;
 	}
 
 	/**
