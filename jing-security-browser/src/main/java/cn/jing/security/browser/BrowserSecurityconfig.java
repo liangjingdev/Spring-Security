@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
-import cn.jing.security.browser.authentication.JingAuthenticationSuccessHandler;
+import cn.jing.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
 import cn.jing.security.core.properties.SecurityProperties;
 import cn.jing.security.core.validate.code.ValidateCodeFilter;
 
@@ -49,11 +48,27 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private DataSource dataSource;
 
+	@Autowired
+	private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
+
+	@Autowired
+	private ValidateCodeFilter validateCodeFilter;
+
+	/**
+	 * function：配置了这个Bean以后，从前端传递过来的密码将被加密
+	 * 
+	 * @return PasswordEncoder实现类对象
+	 */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
+	/**
+	 * function：记住我功能的token存取器配置
+	 * 
+	 * @return
+	 */
 	@Bean
 	public PersistentTokenRepository tokenRepository() {
 		JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
@@ -66,22 +81,18 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
-		// 设置自定义的登录失败处理器
-		validateCodeFilter.setAuthenticationFailureHandler(jingAuthenticationFailureHandler);
-		// 将应用级配置传递进去
-		validateCodeFilter.setSecurityProperties(securityProperties);
-		// 接着手动调用afterPropertiesSet()方法进行相关配置
-		validateCodeFilter.afterPropertiesSet();
-
 		http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class).formLogin()
 				.loginPage("/authentication/require").loginProcessingUrl("/authentication/form")
 				.successHandler(jingAuthenticationSuccessHandler).failureHandler(jingAuthenticationFailureHandler).and()
+				// ----记住我功能配置---
 				.rememberMe().tokenRepository(tokenRepository())
 				.tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
-				.userDetailsService(userDetailsService).and().authorizeRequests()
+				.userDetailsService(userDetailsService)
+				// ----记住我功能配置---
+				.and().authorizeRequests()
 				.antMatchers("/authentication/require", securityProperties.getBrowser().getLoginPage(), "/code/*")
-				.permitAll().anyRequest().authenticated().and().csrf().disable();
+				.permitAll().anyRequest().authenticated().and().csrf().disable()
+				.apply(smsCodeAuthenticationSecurityConfig);
 	}
 
 }
