@@ -26,14 +26,18 @@ import cn.jing.security.core.properties.SecurityProperties;
 import cn.jing.security.core.support.SimpleResponse;
 
 /**
+ * function:浏览器环境下与安全相关的服务
+ * 
  * @author liangjing
  *
  */
 @RestController
 public class BrowserSecurityController {
 
+	// Spring Security缓存请求
 	private RequestCache requestCache = new HttpSessionRequestCache();
 
+	// 重定向工具类
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -48,12 +52,10 @@ public class BrowserSecurityController {
 	}
 
 	/**
-	 * 当需要进行身份认证的时候跳转到此方法
+	 * function：当需要进行身份认证的时候跳转到此方法
 	 *
-	 * @param request
-	 *            请求
-	 * @param response
-	 *            响应
+	 * @param request  请求
+	 * @param response 响应
 	 * @return 将信息以JSON形式返回给前端
 	 */
 	@RequestMapping("/authentication/require")
