@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +23,8 @@ import cn.jing.security.core.properties.LoginType;
 import cn.jing.security.core.properties.SecurityProperties;
 
 /**
+ * function：浏览器环境下登录失败的处理器
+ * 
  * @author liangjing
  *
  */
@@ -32,6 +33,7 @@ public class JingAuthenticationFailureHandler extends SimpleUrlAuthenticationFai
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
+	// Java对象与json字符串相互转换的工具类
 	@Autowired
 	private ObjectMapper objectMapper;
 
