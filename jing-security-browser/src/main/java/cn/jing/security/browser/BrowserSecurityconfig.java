@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.social.security.SpringSocialConfigurer;
 
 import cn.jing.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
 import cn.jing.security.core.properties.SecurityProperties;
@@ -50,6 +51,9 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
+
+	@Autowired
+	private SpringSocialConfigurer springSocialConfigurer;
 
 	@Autowired
 	private ValidateCodeFilter validateCodeFilter;
@@ -92,7 +96,7 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 				.and().authorizeRequests()
 				.antMatchers("/authentication/require", securityProperties.getBrowser().getLoginPage(), "/code/*")
 				.permitAll().anyRequest().authenticated().and().csrf().disable()
-				.apply(smsCodeAuthenticationSecurityConfig);
+				.apply(smsCodeAuthenticationSecurityConfig).and().apply(springSocialConfigurer);
 	}
 
 }
