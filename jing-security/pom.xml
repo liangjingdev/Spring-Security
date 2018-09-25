@@ -6,6 +6,9 @@
 	<groupId>cn.jing.security</groupId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<description>Spring Security技术栈开发企业级认证与授权POM项目</description>
+
+	<!-- jing-security:父模块，聚合项目，主要控制整个项目所需依赖的版本 -->
 
 	<!-- 声明常用属性，以便各子模块引用 -->
 	<properties>
@@ -14,7 +17,7 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Spring IO Platform -->
+			<!-- Spring IO Platform:简单的可以认为是一个依赖维护平台，该平台将相关依赖汇聚到一起，针对每个依赖，都提供了一个版本号(Spring平台的版本控制) -->
 			<dependency>
 				<groupId>io.spring.platform</groupId>
 				<artifactId>platform-bom</artifactId>
@@ -22,7 +25,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- Spring Cloud:在本项目中主要起依赖管理的作用 -->
+			<!-- Spring Cloud:在本项目中主要起依赖管理的作用(Spring Cloud版本控制) -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
