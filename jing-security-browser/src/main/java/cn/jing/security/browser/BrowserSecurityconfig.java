@@ -13,19 +13,25 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.session.InvalidSessionStrategy;
+import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.social.security.SpringSocialConfigurer;
 
+import cn.jing.security.core.authentication.FormAuthenticationConfig;
 import cn.jing.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
+import cn.jing.security.core.authorize.AuthorizeConfigManager;
 import cn.jing.security.core.properties.SecurityProperties;
-import cn.jing.security.core.validate.code.ValidateCodeFilter;
+import cn.jing.security.core.validate.code.ValidateCodeSecurityConfig;
 
 /**
- * function:浏览器环境下安全配置主类
+ * function:浏览器环境下的安全配置主类
+ * 
+ * WebSecurityConfigurerAdapter是默认情况下springsecurity的http配置，通过重载configure(WebSecurity)方法来配置
+ * SpringSecurity的Filter链（WEB安全），通过重载configure(HttpSecurity)方法来配置如何通过过滤器保护请求（HTTP请求安全处理），
+ * 通过重载configure(AuthenticationManagerBuilder)方法来配置user-detail服务（身份验证管理生成器）。
  * 
  * @author liangjing
  *
@@ -37,13 +43,10 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 	private SecurityProperties securityProperties;
 
 	@Autowired
-	private AuthenticationSuccessHandler jingAuthenticationSuccessHandler;
-
-	@Autowired
-	private AuthenticationFailureHandler jingAuthenticationFailureHandler;
-
-	@Autowired
 	private UserDetailsService userDetailsService;
+
+	@Autowired
+	private InvalidSessionStrategy invalidSessionStrategy;
 
 	// 数据库的相关配置在demo模块中的application.properties里
 	@Autowired
@@ -53,10 +56,22 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 	private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
 
 	@Autowired
-	private SpringSocialConfigurer springSocialConfigurer;
+	private SpringSocialConfigurer jingSocialSecurityConfig;
 
 	@Autowired
-	private ValidateCodeFilter validateCodeFilter;
+	private FormAuthenticationConfig formAuthenticationConfig;
+
+	@Autowired
+	private ValidateCodeSecurityConfig validateCodeSecurityConfig;
+
+	@Autowired
+	private SessionInformationExpiredStrategy sessionInformationExpiredStrategy;
+
+	@Autowired
+	private LogoutSuccessHandler logoutSuccessHandler;
+
+	@Autowired
+	private AuthorizeConfigManager authorizeConfigManager;
 
 	/**
 	 * function：配置了这个Bean以后，从前端传递过来的密码将被加密
@@ -69,7 +84,7 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 	}
 
 	/**
-	 * function：记住我功能的token存取器配置
+	 * function:"记住我功能"的token存取器配置
 	 * 
 	 * @return
 	 */
@@ -78,25 +93,36 @@ public class BrowserSecurityconfig extends WebSecurityConfigurerAdapter {
 		JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
 		// 指定数据源
 		tokenRepository.setDataSource(dataSource);
-		// tokenRepository.setCreateTableOnStartup(true);
+		// tokenRepository.setCreateTableOnStartup(true); 建表
 		return tokenRepository;
 	}
 
+	/**
+	 * function:配置如何通过过滤器保护请求（HTTP请求安全处理）
+	 */
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class).formLogin()
-				.loginPage("/authentication/require").loginProcessingUrl("/authentication/form")
-				.successHandler(jingAuthenticationSuccessHandler).failureHandler(jingAuthenticationFailureHandler).and()
-				// ----记住我功能配置---
+		formAuthenticationConfig.configure(http);
+
+		http.apply(validateCodeSecurityConfig).and().apply(smsCodeAuthenticationSecurityConfig).and()
+				.apply(jingSocialSecurityConfig).and()
+				// "记住我功能"配置，如果想在'记住我'登录时记录日志，可以注册一个InteractiveAuthenticationSuccessEvent事件的监听器
 				.rememberMe().tokenRepository(tokenRepository())
 				.tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
-				.userDetailsService(userDetailsService)
-				// ----记住我功能配置---
-				.and().authorizeRequests()
-				.antMatchers("/authentication/require", securityProperties.getBrowser().getLoginPage(), "/code/*")
-				.permitAll().anyRequest().authenticated().and().csrf().disable()
-				.apply(smsCodeAuthenticationSecurityConfig).and().apply(springSocialConfigurer);
+				.userDetailsService(userDetailsService).and()
+				// session管理相关配置
+				.sessionManagement().invalidSessionStrategy(invalidSessionStrategy) // session失效时，默认的处理策略
+				.maximumSessions(securityProperties.getBrowser().getSession().getMaximumSessions()) // 表示最大的Session数量，如果设成1的话，那么同一个用户后边登录所产生的session就会把之前登录所产生的session给失效掉
+				.maxSessionsPreventsLogin(securityProperties.getBrowser().getSession().isMaxSessionsPreventsLogin()) // 达到最大session时是否阻止新的登录请求
+				.expiredSessionStrategy(sessionInformationExpiredStrategy).and().and() // 并发登录导致session失效时，默认的处理策略
+				// 用户退出成功相关配置
+				.logout().logoutUrl("/signOut").logoutSuccessHandler(logoutSuccessHandler).deleteCookies("JSESSIONID")
+				.and()
+				// 防止跨域攻击
+				.csrf().disable();
+
+		authorizeConfigManager.config(http.authorizeRequests());
 	}
 
 }
