@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cn.jing.security.core.properties.LoginType;
+import cn.jing.security.core.properties.LoginResponseType;
 import cn.jing.security.core.properties.SecurityProperties;
 
 /**
@@ -40,22 +40,13 @@ public class JingAuthenticationFailureHandler extends SimpleUrlAuthenticationFai
 	@Autowired
 	private SecurityProperties securityProperties;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.springframework.security.web.authentication.AuthenticationFailureHandler#
-	 * onAuthenticationFailure(javax.servlet.http.HttpServletRequest,
-	 * javax.servlet.http.HttpServletResponse,
-	 * org.springframework.security.core.AuthenticationException)
-	 */
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException exception) throws IOException, ServletException {
 
 		logger.info("登录失败");
 
-		if (LoginType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
+		if (LoginResponseType.JSON.equals(securityProperties.getBrowser().getSignInResponseType())) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setContentType("application/json;charset=UTF-8");
 			response.getWriter().write(objectMapper.writeValueAsString(exception));
