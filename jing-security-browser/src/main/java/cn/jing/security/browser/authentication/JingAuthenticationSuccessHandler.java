@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cn.jing.security.core.properties.LoginType;
+import cn.jing.security.core.properties.LoginResponseType;
 import cn.jing.security.core.properties.SecurityProperties;
 
 /**
@@ -44,7 +44,7 @@ public class JingAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 
 		logger.info("登录成功");
 
-		if (LoginType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
+		if (LoginResponseType.JSON.equals(securityProperties.getBrowser().getSignInResponseType())) {
 			response.setContentType("application/json;charset=UTF-8");
 			response.getWriter().write(objectMapper.writeValueAsString(authentication));
 		} else {
