@@ -29,8 +29,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import cn.jing.security.core.properties.SecurityConstants;
 import cn.jing.security.core.properties.SecurityProperties;
 import cn.jing.security.core.social.SocialController;
+import cn.jing.security.core.social.support.SocialUserInfo;
 import cn.jing.security.core.support.SimpleResponse;
-import cn.jing.security.core.support.SocialUserInfo;
 
 /**
  * function:浏览器环境下与安全相关的服务
@@ -66,7 +66,7 @@ public class BrowserSecurityController extends SocialController {
 	 *
 	 * @param request  请求
 	 * @param response 响应
-	 * @return 将信息以JSON形式返回给前端
+	 * @return 默认情况下，将信息以JSON形式返回给前端
 	 */
 	@RequestMapping("/authentication/require")
 	@ResponseStatus(code = HttpStatus.UNAUTHORIZED)
@@ -79,8 +79,8 @@ public class BrowserSecurityController extends SocialController {
 			String redirectUrl = savedRequest.getRedirectUrl();
 			logger.info("引发跳转的请求的url是：{}", redirectUrl);
 			if (StringUtils.endsWithIgnoreCase(redirectUrl, HTML)) {
-				// 如果是HTML请求，那么就直接跳转到HTML页面(登录页面)，不再执行后面的代码（即不会返回401状态码和错误信息）
-				redirectStrategy.sendRedirect(request, response, securityProperties.getBrowser().getLoginPage());
+				// 如果是HTML请求，那么就直接跳转到HTML页面(登录页面)，不再执行后面的代码（即不会返回401状态码和json响应信息）
+				redirectStrategy.sendRedirect(request, response, securityProperties.getBrowser().getSignInPage());
 			}
 		}
 		return new SimpleResponse("访问的服务需要身份认证，请引导用户到登录页面");
