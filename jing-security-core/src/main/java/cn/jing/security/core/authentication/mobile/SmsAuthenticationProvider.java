@@ -3,7 +3,6 @@
  */
 package cn.jing.security.core.authentication.mobile;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -12,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
- * function:短信登录验证逻辑。 由于短信验证码的验证在SmsCodeFilter过滤器里已完成，所以这里直接读取用户信息即可。
+ * function:短信登录验证逻辑类，由于短信验证码的验证在ValidateCodeFilter过滤器里已经完成，所以这里直接读取用户信息即可。
  * 
  * @author liangjing
  *
@@ -26,7 +25,7 @@ public class SmsAuthenticationProvider implements AuthenticationProvider {
 
 		SmsCodeAuthenticationToken authenticationToken = (SmsCodeAuthenticationToken) authentication;
 
-		// 获取用户信息
+		// 根据手机号获取用户信息
 		UserDetails user = userDetailsService.loadUserByUsername((String) authenticationToken.getPrincipal());
 
 		if (user == null) {
