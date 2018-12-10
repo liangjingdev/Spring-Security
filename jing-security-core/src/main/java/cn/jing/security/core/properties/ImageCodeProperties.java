@@ -4,6 +4,8 @@
 package cn.jing.security.core.properties;
 
 /**
+ * function:图形验证码的相关配置项
+ * 
  * @author liangjing
  *
  */
@@ -27,7 +29,7 @@ public class ImageCodeProperties {
 	private int expireIn = 60;
 
 	/**
-	 * 需要验证码的url字符串，用英文逗号隔开
+	 * 需要展示图形验证码的url字符串，用英文逗号隔开
 	 */
 	private String url;
 
