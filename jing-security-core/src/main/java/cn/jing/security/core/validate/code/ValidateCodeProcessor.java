@@ -6,7 +6,7 @@ package cn.jing.security.core.validate.code;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * function:校验码处理器接口，封装不同校验码的处理逻辑
+ * function:验证码处理器接口，封装不同验证码的处理逻辑
  * 
  * @author liangjing
  *
@@ -14,7 +14,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 public interface ValidateCodeProcessor {
 
 	/**
-	 * function:创建校验码
+	 * function:创建验证码
 	 * 
 	 * @param request
 	 * @throws Exception
