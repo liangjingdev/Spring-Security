@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cn.jing.security.core.properties.LoginType;
+import cn.jing.security.core.properties.LoginResponseType;
 import cn.jing.security.core.properties.SecurityProperties;
 
 /**
@@ -55,7 +55,7 @@ public class JingAuthenticationFailureHandler extends SimpleUrlAuthenticationFai
 
 		logger.info("登录失败");
 
-		if (LoginType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
+		if (LoginResponseType.JSON.equals(securityProperties.getBrowser().getSignInResponseType())) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setContentType("application/json;charset=UTF-8");
 			response.getWriter().write(objectMapper.writeValueAsString(exception));
