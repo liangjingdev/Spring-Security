@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import cn.jing.validator.MyConstraint;
 
 /**
+ * function:用户实体类
+ * 
  * @author liangjing
  *
  */
