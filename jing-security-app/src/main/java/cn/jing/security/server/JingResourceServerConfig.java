@@ -19,7 +19,7 @@ import cn.jing.security.core.authorize.AuthorizeConfigManager;
 import cn.jing.security.core.validate.code.ValidateCodeSecurityConfig;
 
 /**
- * function:资源服务器安全配置类 （继承ResourceServerConfigurerAdapter类）
+ * function:资源服务器安全配置类，通过继承ResourceServerConfigurerAdapter类并重写configure方法去添加一些自定义的配置
  * 
  * @author liangjing
  *
@@ -29,10 +29,10 @@ import cn.jing.security.core.validate.code.ValidateCodeSecurityConfig;
 public class JingResourceServerConfig extends ResourceServerConfigurerAdapter {
 
 	@Autowired
-	protected AuthenticationSuccessHandler imoocAuthenticationSuccessHandler;
+	protected AuthenticationSuccessHandler jingAuthenticationSuccessHandler;
 
 	@Autowired
-	protected AuthenticationFailureHandler imoocAuthenticationFailureHandler;
+	protected AuthenticationFailureHandler jingAuthenticationFailureHandler;
 
 	@Autowired
 	private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
@@ -44,7 +44,7 @@ public class JingResourceServerConfig extends ResourceServerConfigurerAdapter {
 	private ValidateCodeSecurityConfig validateCodeSecurityConfig;
 
 	@Autowired
-	private SpringSocialConfigurer imoocSocialSecurityConfig;
+	private SpringSocialConfigurer jingSocialSecurityConfig;
 
 	@Autowired
 	private AuthorizeConfigManager authorizeConfigManager;
@@ -52,14 +52,16 @@ public class JingResourceServerConfig extends ResourceServerConfigurerAdapter {
 	@Autowired
 	private FormAuthenticationConfig formAuthenticationConfig;
 
+	/**
+	 * function:配置资源的访问规则
+	 */
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 
 		formAuthenticationConfig.configure(http);
 
 		http.apply(validateCodeSecurityConfig).and().apply(smsCodeAuthenticationSecurityConfig).and()
-				.apply(imoocSocialSecurityConfig).and().apply(openIdAuthenticationSecurityConfig).and().csrf()
-				.disable();
+				.apply(jingSocialSecurityConfig).and().apply(openIdAuthenticationSecurityConfig).and().csrf().disable();
 
 		authorizeConfigManager.config(http.authorizeRequests());
 	}
